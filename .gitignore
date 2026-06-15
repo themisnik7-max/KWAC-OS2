@@ -1,0 +1,29 @@
+# Secrets — NEVER commit these
+.env
+*.pem
+*.key
+google_token.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Logs
+*.log
+kwac.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (frontend)
+node_modules/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/

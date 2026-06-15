@@ -4,6 +4,7 @@ All environment variables are read here and nowhere else.
 If a required variable is missing, the app refuses to start with a clear error.
 """
 import os
+import re
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -11,17 +12,19 @@ load_dotenv(Path(__file__).parent / ".env")
 
 
 def _require(key: str) -> str:
-    val = os.getenv(key)
-    if not val:
-        raise RuntimeError(
-            f"Missing required environment variable: {key}\n"
-            f"Check your .env file (copy from .env.example)"
-        )
-    return val
+        val = os.getenv(key)
+        if not val:
+                    raise RuntimeError(
+                                    f"Missing required environment variable: {key}\n"
+                                    f"Check your .env file (copy from .env.example)"
+                    )
+                return val
 
 
 # Database
 DATABASE_URL: str = _require("DATABASE_URL")
+# Fix Supabase pooler hostname: ensure 'aws-0-REGION' format (not 'aws-REGION')
+DATABASE_URL = re.sub(r'@aws-(?!0-)([a-z])', r'@aws-0-\1', DATABASE_URL)
 
 # Security
 SECRET_KEY: str = _require("SECRET_KEY")

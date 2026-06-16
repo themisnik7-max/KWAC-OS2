@@ -652,7 +652,7 @@ function renderProps(props) {
   var stCls = {active:'badge-green',meeting:'badge-yellow',sold:'badge-blue',rented:'badge-blue',withdrawn:'badge-gray'};
   list.innerHTML = filtered.map(function(p){
     var sc = stCls[p.status] || 'badge-gray';
-    var valBtn = p.status === 'meeting' ? '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="openValModal('' + p.id + '','' + (p.address||'').split("'").join('') + '')">Ektimisi</button>' : '';
+    var valBtn = p.status === 'meeting' ? `<button class="btn btn-ghost btn-sm" style="margin-top:8px" data-addr="${(p.address||'').replace(/"/g,'')}" onclick="openValModal('${p.id}',this.getAttribute('data-addr'))">Ektimisi</button>` : '';
     return '<div class="prop-card">' +
       '<div>' +
         (p.ilist_code ? '<div class="prop-code">' + p.ilist_code + '</div>' : '<div class="prop-code" style="background:#333">-</div>') +

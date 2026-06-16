@@ -8,7 +8,8 @@ from time import time
 
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from pydantic import BaseModel, EmailStr
@@ -265,6 +266,15 @@ async def unlock_system(user=Depends(require_role("admin"))):
 app.include_router(agents.router,     prefix="/agents",     tags=["agents"])
 app.include_router(board.router,      prefix="/board",      tags=["board"])
 app.include_router(admin.router,      prefix="/admin",      tags=["admin"])
+app.include_router(messages.router,   prefix="/messages",   tags=["messages"])
+
+# ── SPA static file serving ───────────────────────────────────────
+
+@app.get("/")
+async def serve_index():
+    return FileResponse("static/index.html")
+
+app.mount("/static", StaticFiles(directory="static"), name="static_assets")
 app.include_router(ceo.router,        prefix="/ceo",        tags=["ceo"])
 app.include_router(people.router,     prefix="/people",     tags=["people"])
 app.include_router(properties.router, prefix="/properties", tags=["properties"])

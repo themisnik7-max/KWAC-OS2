@@ -16,6 +16,7 @@ engine = create_async_engine(
     max_overflow=20,
     pool_pre_ping=True,      # reconnects if DB dropped the connection
     echo=config.IS_DEV,      # logs all SQL in development only
+    connect_args={"server_settings": {"search_path": "public"}},
 )
 
 AsyncSessionLocal = async_sessionmaker(

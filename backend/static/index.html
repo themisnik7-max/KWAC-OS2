@@ -4,235 +4,533 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KWAC OS</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.nav-item { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:8px; color:rgba(255,255,255,.7); cursor:pointer; transition:background .15s; }
-.nav-item:hover, .nav-item.active { background:rgba(255,255,255,.2); color:#fff; }
-.card { background:#fff; border-radius:12px; border:1px solid #f1f5f9; padding:24px; }
-.stat-card { background:#fff; border-radius:12px; border:1px solid #f1f5f9; padding:20px; }
-.btn { padding:8px 16px; border-radius:8px; font-weight:500; cursor:pointer; border:none; transition:background .15s; }
-.btn-primary { background:#CC0000; color:#fff; }
-.btn-primary:hover { background:#AA0000; }
-.inp { width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:14px; outline:none; box-sizing:border-box; }
-.inp:focus { border-color:#CC0000; box-shadow:0 0 0 3px rgba(204,0,0,.12); }
-.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:500; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0D0D;--surface:#111111;--card:#181818;--card2:#1E1E1E;
+  --border:#252525;--border2:#2E2E2E;
+  --text:#EFEFEF;--text2:#888888;--text3:#555555;
+  --red:#CC2229;--red-dark:#A81A1F;--red-subtle:rgba(204,34,41,.12);
+  --green:#22C55E;--amber:#F59E0B;--blue:#3B82F6;
+  --r:10px;--r-sm:6px;--r-lg:14px;
+  --font:'Inter',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.5;min-height:100vh}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50}
+.main{margin-left:220px;flex:1;padding:32px;min-height:100vh}
+.sidebar-head{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.sidebar-kw{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px}
+.sidebar-logo{font-size:20px;font-weight:900;color:var(--text);letter-spacing:-.5px}
+.sidebar-user{margin-top:10px;font-size:12px;color:var(--text2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-role{font-size:11px;color:var(--text3);margin-top:1px;text-transform:capitalize}
+nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);color:var(--text3);cursor:pointer;transition:all .15s;font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap}
+.nav-item:hover{background:var(--card);color:var(--text2)}
+.nav-item.active{background:var(--red-subtle);color:var(--red)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-foot{padding:8px;border-top:1px solid var(--border)}
+.logout-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);color:var(--text3);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;width:100%;background:none;border:none}
+.logout-btn:hover{background:var(--card);color:#ef4444}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card-sm{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.stat-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-val{font-size:30px;font-weight:800;line-height:1;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.stat-red{color:var(--red)}
+.stat-green{color:var(--green)}
+.stat-amber{color:var(--amber)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:var(--font)}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:var(--red-dark)}
+.btn-ghost{background:var(--card);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-sm{padding:6px 11px;font-size:12px}
+.btn-block{width:100%;justify-content:center;padding:11px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.inp{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:9px 12px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--red)}
+.inp::placeholder{color:var(--text3)}
+select.inp{cursor:pointer}
+.inp-num{width:72px;text-align:center}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text2);font-size:13px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--card2)}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.12);color:#4ade80}
+.badge-red{background:rgba(204,34,41,.15);color:#f87171}
+.badge-gray{background:var(--card2);color:var(--text3)}
+.badge-amber{background:rgba(245,158,11,.12);color:#fbbf24}
+.progress{background:var(--border);border-radius:999px;height:5px;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;transition:width .3s}
+.qa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.qa-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .15s;text-decoration:none;display:block}
+.qa-card:hover{border-color:var(--border2);background:var(--card2);transform:translateY(-1px)}
+.qa-icon{font-size:20px;margin-bottom:10px}
+.qa-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.qa-sub{font-size:12px;color:var(--text3)}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.login-wrap{min-height:100vh;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{width:100%;max-width:360px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:36px}
+.login-logo-kw{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:var(--red);border-radius:8px;font-size:12px;font-weight:900;color:#fff;margin-bottom:16px}
+.login-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px}
+.page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:700;color:var(--text)}
+.page-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.alert{padding:11px 14px;border-radius:var(--r-sm);font-size:13px;margin-bottom:16px}
+.alert-err{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.alert-ok{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.cat-title{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.metric-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.metric-row:last-child{border-bottom:none}
+.metric-name{flex:1;font-size:13px;color:var(--text2)}
+.metric-target{font-size:11px;color:var(--text3)}
+.empty{text-align:center;padding:40px;color:var(--text3);font-size:13px}
+.ann-item{border-bottom:1px solid var(--border);padding:16px 0}
+.ann-item:last-child{border-bottom:none}
+.ann-type{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.ann-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ann-body{font-size:13px;color:var(--text3);margin-bottom:6px}
+.ann-meta{font-size:11px;color:var(--text3)}
+.sprint-session{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.sprint-session-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sprint-num{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.gps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.gps-item{background:var(--card2);border-radius:var(--r-sm);padding:14px}
+.gps-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.gps-val{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.animate{animation:fade .2s ease}
 </style>
 </head>
-<body style="background:#f8fafc;margin:0">
+<body>
 <div id="app"></div>
 <script>
-const API = '';
-let S = { user:null, page:'login', loading:false, weeklyData:null, goals:[], leaderboard:[], error:null, success:null, lastXP:0 };
-
-async function req(method, path, body) {
-  const r = await fetch(API+path, { method, credentials:'include', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined });
+const S = {
+  user: null, page: 'login',
+  loading: false, error: null, success: null,
+  weeklyData: null, goals: [], leaderboard: [],
+  sprint: [], announcements: [], gps: null,
+  adminAgents: [], adminStats: null,
+};
+async function api(method, path, body) {
+  const opts = {method, credentials: 'include', headers: {'Content-Type': 'application/json'}};
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  if (r.status === 204) return null;
+  const data = await r.json().catch(() => ({detail: r.statusText}));
   if (!r.ok) {
-    const e = await r.json().catch(()=>({detail:r.statusText}));
-    const msg = typeof e.detail === 'string' ? e.detail : (Array.isArray(e.detail) ? e.detail.map(x=>x.msg||x).join(', ') : r.statusText);
-    throw new Error(msg||'Σφάλμα σύνδεσης');
+    const msg = typeof data.detail === 'string' ? data.detail : Array.isArray(data.detail) ? data.detail.map(x => x.msg || String(x)).join(', ') : r.statusText;
+    throw new Error(msg || 'Σφαλμα');
   }
-  return r.status===204 ? null : r.json();
+  return data;
 }
-
-async function checkAuth() { try { S.user = await req('GET','/auth/me'); return true; } catch { return false; } }
-async function logout() { await req('POST','/auth/logout').catch(()=>{}); S.user=null; nav('login'); }
-
-async function loadDash() {
-  const [w,g,me] = await Promise.all([
-    req('GET','/agents/weekly/current').catch(()=>null),
-    req('GET','/agents/goals').catch(()=>[]),
-    req('GET','/agents/me').catch(()=>null)
-  ]);
-  S.weeklyData=w; S.goals=g;
-  if(me) S.user={...S.user,...me};
-}
-
 async function nav(page) {
-  S.page=page; S.error=null; S.success=null;
-  if(page==='dashboard') await loadDash();
-  if(page==='leaderboard') S.leaderboard = await req('GET','/agents/leaderboard').catch(()=>[]);
-  render();
+  S.page = page; S.error = null; S.success = null;
+  S.loading = true; render();
+  try {
+    if (page === 'dashboard') {
+      const [me, stats] = await Promise.all([
+        api('GET', '/agents/me').catch(() => null),
+        isPrivileged() ? api('GET', '/admin/stats').catch(() => null) : Promise.resolve(null),
+      ]);
+      if (me) S.user = Object.assign({}, S.user, me);
+      S.adminStats = stats;
+    }
+    if (page === 'weekly') {
+      const [w, g] = await Promise.all([
+        api('GET', '/agents/weekly/current').catch(() => null),
+        api('GET', '/agents/goals').catch(() => []),
+      ]);
+      S.weeklyData = w; S.goals = g;
+    }
+    if (page === 'sprint') S.sprint = await api('GET', '/agents/sprint').catch(() => []);
+    if (page === 'leaderboard') S.leaderboard = await api('GET', '/agents/leaderboard').catch(() => []);
+    if (page === 'board') S.announcements = await api('GET', '/board/announcements').catch(() => []);
+    if (page === 'gps') S.gps = await api('GET', '/agents/gps').catch(() => null);
+    if (page === 'admin') {
+      const [agents, stats] = await Promise.all([api('GET', '/admin/agents').catch(() => []), api('GET', '/admin/stats').catch(() => null)]);
+      S.adminAgents = agents; S.adminStats = stats;
+    }
+  } catch (e) { S.error = e.message; }
+  S.loading = false; render();
+}
+function isPrivileged() { return S.user && (S.user.role === 'ceo' || S.user.role === 'admin'); }
+async function logout() { await api('POST', '/auth/logout').catch(() => {}); S.user = null; S.page = 'login'; render(); }
+function render() { document.getElementById('app').innerHTML = S.user ? appShell() : loginPage(); bind(); }
+function esc(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function loginPage() {
+  return '<div class="login-wrap"><div class="login-box animate"><div class="login-card">' +
+    '<div class="login-logo-kw">KW</div>' +
+    '<div class="login-title">KWAC OS</div>' +
+    '<div class="login-sub">Keller Williams Athens Central</div>' +
+    (S.error ? '<div class="alert alert-err">' + esc(S.error) + '</div>' : '') +
+    '<form id="lf">' +
+    '<div class="form-group"><label class="form-label">Email</label><input class="inp" type="email" id="le" placeholder="name@example.com" required></div>' +
+    '<div class="form-group" style="margin-bottom:24px"><label class="form-label">Κωδικος</label><input class="inp" type="password" id="lp" placeholder="..." required></div>' +
+    '<button type="submit" class="btn btn-red btn-block">' + (S.loading ? 'Συνδεση...' : 'Συνδεση') + '</button>' +
+    '</form></div>' +
+    '<div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text3)">KWAC OS - Confidential</div>' +
+    '</div></div>';
 }
 
-function render() {
-  document.getElementById('app').innerHTML = S.user ? shell() : login();
-  bind();
-}
-
-function login() {
-  return `<div style="min-height:100vh;background:#CC0000;display:flex;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#fff;border-radius:20px;box-shadow:0 25px 50px rgba(0,0,0,.25);width:100%;max-width:360px;padding:40px">
-    <div style="text-align:center;margin-bottom:32px">
-      <div style="font-size:28px;font-weight:900;color:#CC0000;letter-spacing:-1px">KWAC OS</div>
-      <div style="font-size:13px;color:#94a3b8;margin-top:4px">Real Estate CRM</div>
-    </div>
-    ${S.error?`<div style="background:#fef2f2;color:#CC0000;font-size:13px;border-radius:8px;padding:12px;margin-bottom:16px">${S.error}</div>`:''}
-    <form id="lf">
-      <div style="margin-bottom:16px">
-        <label style="display:block;font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px">EMAIL</label>
-        <input class="inp" type="email" id="le" placeholder="email@example.com" required>
-      </div>
-      <div style="margin-bottom:24px">
-        <label style="display:block;font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px">ΚΩΔΙΚΟΣ</label>
-        <input class="inp" type="password" id="lp" placeholder="••••••••" required>
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px">
-        ${S.loading?'Σύνδεση...':'Σύνδεση →'}
-      </button>
-    </form>
-  </div>
-</div>`;
-}
-
-function shell() {
-  return `<div style="display:flex">
-  <aside style="background:#CC0000;color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;width:220px;z-index:10">
-    <div style="padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.1)">
-      <div style="font-size:20px;font-weight:900;letter-spacing:-0.5px">KWAC OS</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:4px">${S.user.full_name||S.user.email}</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;text-transform:capitalize">${S.user.role}</div>
-    </div>
-    <nav style="flex:1;padding:12px">
-      <div class="nav-item ${S.page==='dashboard'?'active':''}" data-nav="dashboard">
-        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        Dashboard
-      </div>
-      <div class="nav-item ${S.page==='weekly'?'active':''}" data-nav="weekly">
-        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        Εβδομαδιαία
-      </div>
-      <div class="nav-item ${S.page==='leaderboard'?'active':''}" data-nav="leaderboard">
-        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        Κατάταξη
-      </div>
-    </nav>
-    <div style="padding:12px">
-      <div class="nav-item" id="logoutBtn" style="color:rgba(255,255,255,.6);cursor:pointer">
-        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-        Αποσύνδεση
-      </div>
-    </div>
-  </aside>
-  <main style="margin-left:220px;flex:1;padding:32px;min-height:100vh">
-    ${page()}
-  </main>
-</div>`;
-}
-
-function page() {
-  if(S.page==='dashboard') return dash();
-  if(S.page==='weekly') return weekly();
-  if(S.page==='leaderboard') return lb();
-  return dash();
-}
-
-function dash() {
-  const w=S.weeklyData, xp=w?.xp_earned||0, submitted=!!w?.submitted_at;
-  const today=new Date(), mon=new Date(today); mon.setDate(today.getDate()-today.getDay()+1);
-  const weekStr=mon.toLocaleDateString('el-GR',{day:'numeric',month:'long'});
-  const gcards=S.goals.slice(0,6).map(g=>{
-    const val=w?.[g.metric]||0, pct=Math.min(100,Math.round(val/(g.target||1)*100)), hit=val>=g.target;
-    return `<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><span style="font-size:12px;color:#64748b">${g.label_el||g.metric}</span><span class="badge" style="background:${hit?'#d1fae5':'#f1f5f9'};color:${hit?'#065f46':'#64748b'}">${val}/${g.target}</span></div><div style="margin-top:10px;background:#f1f5f9;border-radius:999px;height:6px"><div style="height:6px;border-radius:999px;width:${pct}%;background:${hit?'#10b981':'#CC0000'}"></div></div></div>`;
+function appShell() {
+  const p = S.page;
+  const items = [
+    {id:'dashboard', ico:icoHome(), lbl:'Dashboard'},
+    {id:'weekly', ico:icoClip(), lbl:'Εβδομαδιαια'},
+    {id:'sprint', ico:icoBolt(), lbl:'Sprint Calls'},
+    {id:'leaderboard', ico:icoTrophy(), lbl:'Καταταξη'},
+    {id:'board', ico:icoBell(), lbl:'Ανακοινωσεις'},
+    {id:'gps', ico:icoTarget(), lbl:'GPS Goals'},
+  ];
+  if (isPrivileged()) items.push({id:'admin', ico:icoUsers(), lbl:'Διαχειριση'});
+  const navHtml = items.map(function(it) {
+    return '<a class="nav-item' + (p===it.id?' active':'') + '" data-nav="' + it.id + '" href="#">' + it.ico + it.lbl + '</a>';
   }).join('');
-  return `<div style="max-width:900px;margin:0 auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
-      <div><h1 style="font-size:24px;font-weight:700;color:#0f172a;margin:0">Γεια, ${(S.user.full_name||'').split(' ')[0]}! 👋</h1><p style="color:#64748b;font-size:14px;margin:4px 0 0">Εβδομάδα ${weekStr}</p></div>
-      ${!submitted?`<button class="btn btn-primary" data-nav="weekly" style="font-size:14px">+ Καταχώρηση</button>`:`<span class="badge" style="background:#d1fae5;color:#065f46;padding:8px 16px;font-size:13px">✓ Υποβλήθηκε</span>`}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
-      <div class="stat-card"><div style="font-size:12px;color:#64748b">XP Εβδομάδας</div><div style="font-size:28px;font-weight:700;color:#CC0000;margin-top:4px">${xp}</div></div>
-      <div class="stat-card"><div style="font-size:12px;color:#64748b">Σύνολο XP</div><div style="font-size:28px;font-weight:700;color:#0f172a;margin-top:4px">${S.user.xp_total||0}</div></div>
-      <div class="stat-card"><div style="font-size:12px;color:#64748b">Level</div><div style="font-size:28px;font-weight:700;color:#f59e0b;margin-top:4px">${S.user.level||1}</div></div>
-      <div class="stat-card"><div style="font-size:12px;color:#64748b">Streak</div><div style="font-size:28px;font-weight:700;color:#10b981;margin-top:4px">${S.user.streak_weeks||0} 🔥</div></div>
-    </div>
-    ${S.goals.length?`<div class="card"><h2 style="font-size:13px;font-weight:600;color:#475569;margin:0 0 16px;text-transform:uppercase;letter-spacing:.05em">Στόχοι εβδομάδας</h2><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">${gcards}</div></div>`:''}
-  </div>`;
+  return '<div class="layout">' +
+    '<aside class="sidebar">' +
+      '<div class="sidebar-head">' +
+        '<div class="sidebar-kw">Keller Williams</div>' +
+        '<div class="sidebar-logo">KWAC OS</div>' +
+        '<div class="sidebar-user">' + esc(S.user.full_name || S.user.email) + '</div>' +
+        '<div class="sidebar-role">' + esc(S.user.role) + '</div>' +
+      '</div>' +
+      '<nav>' + navHtml + '</nav>' +
+      '<div class="sidebar-foot"><button class="logout-btn" id="logoutBtn">' + icoLogout() + 'Αποσυνδεση</button></div>' +
+    '</aside>' +
+    '<main class="main animate">' +
+      (S.error ? '<div class="alert alert-err" style="margin-bottom:20px">' + esc(S.error) + '</div>' : '') +
+      (S.success ? '<div class="alert alert-ok" style="margin-bottom:20px">' + esc(S.success) + '</div>' : '') +
+      pageContent() +
+    '</main></div>';
 }
 
-const FIELDS=[
-  {cat:'Δημιουργία Leads',fields:[{k:'cold_calls',l:'Cold Calls',t:30},{k:'social_media_leads',l:'Social Media Leads',t:5},{k:'mail_leads',l:'Mail Leads',t:0},{k:'portal_leads',l:'Portal Leads',t:0},{k:'referrals',l:'Συστάσεις (εισ.)',t:2}]},
-  {cat:'Follow Up',fields:[{k:'followup_calls',l:'Follow Up Calls',t:20}]},
-  {cat:'Ραντεβού',fields:[{k:'first_meetings',l:'1ο Ραντεβού',t:4},{k:'second_meetings',l:'2ο Ραντεβού',t:2},{k:'meetings_with_seller',l:'Ραντεβού Πωλητή',t:0},{k:'meetings_with_buyer',l:'Ραντεβού Αγοραστή',t:0},{k:'meetings_with_tenant',l:'Ραντεβού Ενοικιαστή',t:0}]},
-  {cat:'Αναθέσεις',fields:[{k:'exclusive_listings',l:'Αποκλειστική Ανάθεση',t:1},{k:'simple_listings',l:'Απλή Ανάθεση',t:2}]},
-  {cat:'Συμβόλαια',fields:[{k:'sale_contracts',l:'Συμβόλαιο Πώλησης',t:1},{k:'purchase_contracts',l:'Συμβόλαιο Αγοράς',t:0},{k:'rental_contracts',l:'Συμβόλαιο Ενοικίου',t:1}]},
-  {cat:'Marketing',fields:[{k:'photo_shoots',l:'Φωτογραφήσεις',t:0},{k:'open_houses',l:'Open House',t:1},{k:'matterport_scans',l:'Matterport',t:0},{k:'floor_plans',l:'Floor Plans',t:0}]},
-  {cat:'Networking',fields:[{k:'new_partners',l:'Νέοι Συνεργάτες',t:0},{k:'referrals_given',l:'Συστάσεις (εξ.)',t:0}]},
-  {cat:'Εκπαίδευση',fields:[{k:'trainings_attended',l:'Εκπαιδεύσεις',t:1},{k:'team_meetings',l:'Team Meetings',t:0},{k:'conferences',l:'Συνέδρια',t:0}]},
+function pageContent() {
+  if (S.loading) return '<div class="empty">Φορτωση...</div>';
+  if (S.page==='dashboard') return pageDash();
+  if (S.page==='weekly') return pageWeekly();
+  if (S.page==='sprint') return pageSprint();
+  if (S.page==='leaderboard') return pageLeaderboard();
+  if (S.page==='board') return pageBoard();
+  if (S.page==='gps') return pageGPS();
+  if (S.page==='admin') return pageAdmin();
+  return pageDash();
+}
+
+function statCard(label, val, sub, cls) {
+  return '<div class="stat-card"><div class="stat-label">' + label + '</div><div class="stat-val' + (cls?' '+cls:'') + '">' + val + '</div>' + (sub?'<div class="stat-sub">'+sub+'</div>':'') + '</div>';
+}
+
+function pageDash() {
+  const today = new Date();
+  const days = ['Κυριακη','Δευτερα','Τριτη','Τεταρτη','Πεμπτη','Παρασκευη','Σαββατο'];
+  const months = ['Ιαν','Φεβ','Μαρ','Απρ','Μαϊ','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'];
+  const dateStr = days[today.getDay()] + ' ' + today.getDate() + ' ' + months[today.getMonth()];
+  const hour = today.getHours();
+  const greet = hour < 12 ? 'Καλημερα' : 'Καλησπερα';
+  const name = (S.user.full_name || '').split(' ')[0] || S.user.email;
+  const u = S.user;
+  let adminHtml = '';
+  if (isPrivileged() && S.adminStats) {
+    const st = S.adminStats;
+    adminHtml = '<div class="stat-grid">' +
+      statCard('Μεσιτες', st.total_agents||0, 'Ενεργα μελη', '') +
+      statCard('Επαφες', st.total_contacts||0, 'Στη βαση', '') +
+      statCard('Ακινητα', st.total_properties||0, '', '') +
+      statCard('Υπεβαλαν', (st.submitted_this_week||0)+'/'+(st.total_agents||0), 'Αυτη την εβδ.', '') +
+    '</div>';
+  }
+  const qa = [
+    {nav:'weekly', icon:'📋', title:'Εβδ. Ενεργειες', sub:'Καταχωρηση εβδομαδας'},
+    {nav:'sprint', icon:'⚡', title:'Sprint Calls', sub:'Καταχωρηση sprint'},
+    {nav:'board', icon:'📢', title:'Ανακοινωσεις', sub:'Ειδησεις & events'},
+    {nav:'leaderboard', icon:'🏆', title:'Καταταξη', sub:'XP & επιδοση'},
+    {nav:'gps', icon:'🎯', title:'GPS Goals', sub:'Οικονομικοι στοχοι'},
+    {nav: isPrivileged()?'admin':'weekly', icon: isPrivileged()?'👥':'✏️', title: isPrivileged()?'Διαχειριση':'Στοχοι', sub: isPrivileged()?'Agents & στατιστικα':'Εβδομαδιαιοι στοχοι'},
+  ];
+  const qaHtml = qa.map(function(q) {
+    return '<a class="qa-card" data-nav="' + q.nav + '" href="#"><div class="qa-icon">' + q.icon + '</div><div class="qa-title">' + q.title + '</div><div class="qa-sub">' + q.sub + '</div></a>';
+  }).join('');
+  return '<div>' +
+    '<div class="page-head"><div>' +
+      '<h1 style="font-size:24px;font-weight:800;color:var(--text)">' + greet + ', ' + esc(name) + '</h1>' +
+      '<div style="font-size:13px;color:var(--text3);margin-top:3px">' + dateStr + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px">' +
+      '<a class="btn btn-ghost btn-sm" data-nav="weekly" href="#">+ Εβδομαδιαια</a>' +
+      '<a class="btn btn-red btn-sm" data-nav="sprint" href="#">⚡ Sprint</a>' +
+    '</div></div>' +
+    adminHtml +
+    '<div class="stat-grid">' +
+      '<div class="stat-card"><div class="stat-label">XP Εβδομαδας</div><div class="stat-val stat-red">' + (u.xp_this_week||0) + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Συνολο XP</div><div class="stat-val">' + (u.xp_total||0) + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Level</div><div class="stat-val stat-amber">' + (u.level||1) + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Streak</div><div class="stat-val stat-green">' + (u.streak_weeks||0) + ' 🔥</div></div>' +
+    '</div>' +
+    '<div class="sec-head"><div class="sec-title">Γρηγορες ενεργειες</div></div>' +
+    '<div class="qa-grid">' + qaHtml + '</div>' +
+  '</div>';
+}
+
+const FIELDS = [
+  {cat:'Δημιουργια Leads', fields:[{k:'cold_calls',l:'Cold Calls',t:30},{k:'social_media_leads',l:'Social Media Leads',t:5},{k:'mail_leads',l:'Mail Leads',t:0},{k:'portal_leads',l:'Portal Leads',t:0},{k:'referrals',l:'Συστασεις (εισ.)',t:2}]},
+  {cat:'Follow Up', fields:[{k:'followup_calls',l:'Follow Up Calls',t:20}]},
+  {cat:'Ραντεβου', fields:[{k:'first_meetings',l:'1ο Ραντεβου',t:4},{k:'second_meetings',l:'2ο Ραντεβου',t:2},{k:'meetings_with_seller',l:'Ραντεβου Πωλητη',t:0},{k:'meetings_with_buyer',l:'Ραντεβου Αγοραστη',t:0},{k:'meetings_with_tenant',l:'Ραντεβου Ενοικιαστη',t:0}]},
+  {cat:'Αναθεσεις', fields:[{k:'exclusive_listings',l:'Αποκλειστικη Αναθεση',t:1},{k:'simple_listings',l:'Απλη Αναθεση',t:2}]},
+  {cat:'Συμβολαια', fields:[{k:'sale_contracts',l:'Συμβολαιο Πωλησης',t:1},{k:'purchase_contracts',l:'Συμβολαιο Αγορας',t:0},{k:'rental_contracts',l:'Συμβολαιο Ενοικιου',t:1}]},
+  {cat:'Marketing', fields:[{k:'photo_shoots',l:'Φωτογραφησεις',t:0},{k:'open_houses',l:'Open House',t:1},{k:'matterport_scans',l:'Matterport',t:0},{k:'floor_plans',l:'Floor Plans',t:0}]},
+  {cat:'Networking', fields:[{k:'new_partners',l:'Νεοι Συνεργατες',t:0},{k:'referrals_given',l:'Συστασεις (εξ.)',t:0}]},
+  {cat:'Εκπαιδευση', fields:[{k:'trainings_attended',l:'Εκπαιδευσεις',t:1},{k:'team_meetings',l:'Team Meetings',t:0},{k:'conferences',l:'Συνεδρια',t:0}]},
 ];
 
-function weekly() {
-  const w=S.weeklyData;
-  const groups=FIELDS.map(g=>{
-    const rows=g.fields.map(f=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f8fafc"><span style="flex:1;font-size:14px;color:#374151">${f.l}${f.t?` <span style="font-size:11px;color:#94a3b8">(στόχος: ${f.t})</span>`:''}</span><input type="number" min="0" name="${f.k}" value="${w?.[f.k]||0}" style="width:72px;border:1px solid #e2e8f0;border-radius:8px;padding:6px;text-align:center;font-size:14px;outline:none"></div>`).join('');
-    return `<div class="card" style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">${g.cat}</div>${rows}</div>`;
+function pageWeekly() {
+  const w = S.weeklyData;
+  const submitted = w && w.submitted_at;
+  const groups = FIELDS.map(function(g) {
+    const rows = g.fields.map(function(f) {
+      const val = w ? (w[f.k]||0) : 0;
+      const goalRow = S.goals.find(function(gg){return gg.metric===f.k;});
+      const target = goalRow ? goalRow.target : f.t;
+      const pct = target>0 ? Math.min(100,Math.round(val/target*100)) : 0;
+      const hit = val>=target && target>0;
+      return '<div class="metric-row">' +
+        '<div class="metric-name">' + esc(f.l) + (target>0?'<span class="metric-target"> · στοχος '+target+'</span>':'') + '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          (target>0?'<div style="width:60px"><div class="progress"><div class="progress-fill" style="width:'+pct+'%;background:'+(hit?'var(--green)':'var(--red)')+'"></div></div></div>':'') +
+          '<input type="number" min="0" name="'+f.k+'" value="'+val+'" class="inp inp-num">' +
+        '</div></div>';
+    }).join('');
+    return '<div class="card" style="margin-bottom:12px"><div class="cat-title">'+g.cat+'</div>'+rows+'</div>';
   }).join('');
-  return `<div style="max-width:640px;margin:0 auto">
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
-      <span style="color:#CC0000;cursor:pointer;font-size:14px" data-nav="dashboard">← Πίσω</span>
-      <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0">Εβδομαδιαία Καταχώρηση</h1>
-    </div>
-    ${S.error?`<div style="background:#fef2f2;color:#dc2626;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px">${S.error}</div>`:''}
-    ${S.success?`<div style="background:#f0fdf4;color:#16a34a;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px">✓ Υποβλήθηκε! +${S.lastXP} XP 🎉</div>`:''}
-    <form id="wf">${groups}
-      <div class="card" style="margin-bottom:16px">
-        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">ΣΗΜΕΙΩΣΕΙΣ</div>
-        <textarea name="notes" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-size:14px;resize:vertical;height:80px;outline:none;box-sizing:border-box">${w?.notes||''}</textarea>
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px">${S.loading?'Υποβολή...':'✓ Υποβολή Εβδομάδας'}</button>
-    </form>
-  </div>`;
+  return '<div style="max-width:640px;margin:0 auto">' +
+    '<div class="page-head"><div><h1 class="page-title">Εβδομαδιαια Καταχωρηση</h1><div class="page-sub">'+(submitted?'Υποβληθηκε αυτη την εβδομαδα':'Δεν εχει υποβληθει')+'</div></div>' +
+    '<a class="btn btn-ghost btn-sm" data-nav="dashboard" href="#">Πισω</a></div>' +
+    '<form id="wf">' + groups +
+    '<div class="card" style="margin-bottom:12px"><div class="cat-title">Σημειωσεις</div>' +
+    '<textarea name="notes" class="inp" style="height:80px;resize:vertical" placeholder="Προαιρετικες σημειωσεις...">' + esc(w?(w.notes||''):'') + '</textarea></div>' +
+    '<button type="submit" class="btn btn-red btn-block">' + (S.loading?'Αποθηκευση...':'Υποβολη Εβδομαδας') + '</button>' +
+    '</form></div>';
 }
 
-function lb() {
+function pageSprint() {
+  const today = new Date().toISOString().split('T')[0];
+  const sessions = [1,2,3].map(function(num) {
+    const ex = S.sprint.find(function(s){return s.session_date===today && s.session_number===num;});
+    const calls = ex?ex.calls_made:0, leads=ex?ex.leads_generated:0, meet=ex?ex.meetings_booked:0;
+    const logged = ex && ex.entered_at;
+    return '<div class="sprint-session">' +
+      '<div class="sprint-session-head"><div class="sprint-num">Session '+num+'</div>' +
+      (logged?'<span class="badge badge-green">Καταχωρηθηκε</span>':'<span class="badge badge-gray">Εκκρεμει</span>') +
+      '</div>' +
+      '<form class="sprint-form" data-num="'+num+'" data-date="'+today+'">' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">' +
+      '<div><div class="form-label">Κλησεις</div><input type="number" name="calls_made" min="0" value="'+calls+'" class="inp" style="text-align:center"></div>' +
+      '<div><div class="form-label">Leads</div><input type="number" name="leads_generated" min="0" value="'+leads+'" class="inp" style="text-align:center"></div>' +
+      '<div><div class="form-label">Ραντεβου</div><input type="number" name="meetings_booked" min="0" value="'+meet+'" class="inp" style="text-align:center"></div>' +
+      '</div><button type="submit" class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%">Καταχωρηση</button></form></div>';
+  }).join('');
+  const tCalls=S.sprint.reduce(function(a,s){return a+(s.calls_made||0);},0);
+  const tLeads=S.sprint.reduce(function(a,s){return a+(s.leads_generated||0);},0);
+  const tMeet=S.sprint.reduce(function(a,s){return a+(s.meetings_booked||0);},0);
+  return '<div style="max-width:600px;margin:0 auto">' +
+    '<div class="page-head"><div><h1 class="page-title">Sprint Calls</h1><div class="page-sub">3 sessions / ημερα</div></div></div>' +
+    '<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">' +
+    statCard('Εβδ. Κλησεις',tCalls,'','stat-red') + statCard('Εβδ. Leads',tLeads,'','stat-amber') + statCard('Εβδ. Ραντεβου',tMeet,'','stat-green') +
+    '</div>' +
+    '<div class="sec-head"><div class="sec-title">Σημερα</div></div>' +
+    sessions + '</div>';
+}
+
+function pageLeaderboard() {
   const medals=['🥇','🥈','🥉'];
-  const rows=S.leaderboard.map((a,i)=>`<tr style="border-bottom:1px solid #f8fafc"><td style="padding:12px 16px;color:#94a3b8;font-size:14px">${medals[i]||(i+1)}</td><td style="padding:12px 0;font-weight:500;color:#0f172a">${a.full_name}</td><td style="padding:12px 16px;text-align:right;color:#CC0000;font-weight:700">${a.xp_this_week||0}</td><td style="padding:12px 16px;text-align:right;color:#64748b">${a.xp_total||0}</td><td style="padding:12px 16px;text-align:right">${a.submitted_at?'<span class="badge" style="background:#d1fae5;color:#065f46">OK</span>':'<span class="badge" style="background:#f1f5f9;color:#94a3b8">-</span>'}</td></tr>`).join('');
-  return `<div style="max-width:640px;margin:0 auto">
-    <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 24px">Κατάταξη Εβδομάδας</h1>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table style="width:100%;border-collapse:collapse">
-        <thead style="background:#f8fafc;border-bottom:1px solid #e2e8f0"><tr>
-          <th style="padding:12px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:600">#</th>
-          <th style="padding:12px 0;text-align:left;font-size:11px;color:#64748b;font-weight:600">ΠΡΑΚΤΟΡΑΣ</th>
-          <th style="padding:12px 16px;text-align:right;font-size:11px;color:#64748b;font-weight:600">XP ΕΒΔ.</th>
-          <th style="padding:12px 16px;text-align:right;font-size:11px;color:#64748b;font-weight:600">ΣΥΝΟΛΟ</th>
-          <th style="padding:12px 16px;text-align:right;font-size:11px;color:#64748b;font-weight:600">ΥΠΕΒΑΛΕ</th>
-        </tr></thead>
-        <tbody>${rows||'<tr><td colspan="5" style="text-align:center;padding:40px;color:#94a3b8">Κανένα δεδομένο ακόμα</td></tr>'}</tbody>
-      </table>
-    </div>
-  </div>`;
+  const rows=S.leaderboard.map(function(a,i){
+    return '<tr><td style="color:var(--text3)">'+(medals[i]||(i+1))+'</td>' +
+      '<td style="color:var(--text);font-weight:600">'+esc(a.full_name)+'</td>' +
+      '<td style="color:var(--red);font-weight:700;text-align:right">'+a.xp_this_week+'</td>' +
+      '<td style="text-align:right">'+a.xp_total+'</td>' +
+      '<td style="text-align:right"><span class="badge badge-amber">Lv '+a.level+'</span></td>' +
+      '<td style="text-align:right">'+a.streak_weeks+' 🔥</td>' +
+      '<td style="text-align:right">'+(a.submitted_at?'<span class="badge badge-green">✓</span>':'<span class="badge badge-gray">—</span>')+'</td></tr>';
+  }).join('');
+  return '<div><div class="page-head"><h1 class="page-title">Καταταξη Εβδομαδας</h1></div>' +
+    '<div class="card" style="padding:0;overflow:hidden"><table class="tbl">' +
+    '<thead><tr><th>#</th><th>Πρακτορας</th><th style="text-align:right">XP Εβδ.</th><th style="text-align:right">Συνολο</th><th style="text-align:right">Level</th><th style="text-align:right">Streak</th><th style="text-align:right">Υπεβαλε</th></tr></thead>' +
+    '<tbody>'+(rows||'<tr><td colspan="7" class="empty">Κανενα δεδομενο</td></tr>')+'</tbody></table></div></div>';
+}
+
+const ANN_TYPES={listing:{label:'Αναθεση',color:'var(--red)',bg:'var(--red-subtle)'},wanted:{label:'Ζητηση',color:'#fbbf24',bg:'rgba(251,191,36,.1)'},cooperation:{label:'Συνεργασια',color:'#60a5fa',bg:'rgba(96,165,250,.1)'},other:{label:'Αλλο',color:'var(--text3)',bg:'var(--card2)'}};
+
+function pageBoard() {
+  const list = S.announcements.length>0 ? S.announcements.map(function(a) {
+    const t=ANN_TYPES[a.type]||ANN_TYPES.other;
+    const when=a.created_at?new Date(a.created_at).toLocaleDateString('el-GR'):'';
+    return '<div class="ann-item"><span class="ann-type" style="color:'+t.color+';background:'+t.bg+'">'+t.label+'</span>' +
+      '<div class="ann-title">'+esc(a.title)+'</div>' +
+      (a.body?'<div class="ann-body">'+esc(a.body)+'</div>':'') +
+      '<div class="ann-meta">'+esc(a.author_name||'')+' · '+when+
+      (isPrivileged()?' <button class="btn btn-sm" data-del-ann="'+a.id+'" style="margin-left:8px;color:#ef4444;background:none;border:none;cursor:pointer;font-size:11px">Διαγραφη</button>':'')+
+      '</div></div>';
+  }).join('') : '<div class="empty">Δεν υπαρχουν ανακοινωσεις</div>';
+  const form = isPrivileged() ? '<div class="card" style="margin-bottom:20px"><div class="sec-title" style="margin-bottom:14px">Νεα ανακοινωση</div><form id="annf">' +
+    '<div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:10px">' +
+    '<input class="inp" name="title" placeholder="Τιτλος" required>' +
+    '<select class="inp" name="type" style="width:130px"><option value="other">Αλλο</option><option value="listing">Αναθεση</option><option value="wanted">Ζητηση</option><option value="cooperation">Συνεργασια</option></select></div>' +
+    '<textarea class="inp" name="body" style="height:70px;resize:none;margin-bottom:10px" placeholder="Λεπτομερειες..."></textarea>' +
+    '<button type="submit" class="btn btn-red btn-sm">Δημοσιευση</button></form></div>' : '';
+  return '<div style="max-width:640px;margin:0 auto"><div class="page-head"><h1 class="page-title">Ανακοινωσεις</h1></div>'+form+'<div class="card">'+list+'</div></div>';
+}
+
+function pageGPS() {
+  const g=S.gps||{};
+  const gci=g.annual_gci||0, units=g.units_target||0, listings=g.listings_target||0, buyers=g.buyers_target||0;
+  const yr=g.year||new Date().getFullYear();
+  const month=new Date().getMonth()+1;
+  const yearPct=Math.round(month/12*100);
+  const gciM=gci>0?Math.round(gci/12):0;
+  return '<div style="max-width:560px;margin:0 auto">' +
+    '<div class="page-head"><div><h1 class="page-title">GPS Goals '+yr+'</h1><div class="page-sub">Goal Planning Session</div></div></div>' +
+    (gci>0?'<div class="card" style="margin-bottom:20px"><div class="sec-title" style="margin-bottom:14px">Προοδος Ετους ('+yearPct+'%)</div>' +
+    '<div class="gps-grid">' +
+    '<div class="gps-item"><div class="gps-label">Ετησιο GCI</div><div class="gps-val">'+gci.toLocaleString('el-GR')+' €</div></div>' +
+    '<div class="gps-item"><div class="gps-label">Μηνιαια Βαση</div><div class="gps-val">'+gciM.toLocaleString('el-GR')+' €</div></div>' +
+    '<div class="gps-item"><div class="gps-label">Μοναδες</div><div class="gps-val">'+units+'</div></div>' +
+    '<div class="gps-item"><div class="gps-label">Listings</div><div class="gps-val">'+listings+'</div></div>' +
+    '</div>' +
+    '<div class="progress" style="margin-top:16px;height:8px"><div class="progress-fill" style="width:'+yearPct+'%;background:var(--red)"></div></div>' +
+    '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px"><span>Ιαν</span><span>Δεκ</span></div></div>':'') +
+    '<div class="card"><div class="sec-title" style="margin-bottom:16px">Ορισμος Στοχων</div><form id="gpsf">' +
+    '<div class="gps-grid" style="margin-bottom:16px">' +
+    '<div><div class="form-label">Ετησιο GCI (€)</div><input type="number" name="annual_gci" class="inp" value="'+gci+'" placeholder="60000" min="0"></div>' +
+    '<div><div class="form-label">Μοναδες</div><input type="number" name="units_target" class="inp" value="'+units+'" placeholder="12" min="0"></div>' +
+    '<div><div class="form-label">Listings</div><input type="number" name="listings_target" class="inp" value="'+listings+'" placeholder="8" min="0"></div>' +
+    '<div><div class="form-label">Αγοραστες</div><input type="number" name="buyers_target" class="inp" value="'+buyers+'" placeholder="4" min="0"></div>' +
+    '</div><button type="submit" class="btn btn-red btn-sm">Αποθηκευση</button></form></div></div>';
+}
+
+function pageAdmin() {
+  const st=S.adminStats||{};
+  const rows=S.adminAgents.map(function(a){
+    const active=a.is_active;
+    return '<tr><td style="color:var(--text);font-weight:600">'+esc(a.full_name)+'</td><td style="font-size:12px">'+esc(a.email)+'</td>' +
+      '<td><span class="badge badge-gray">'+esc(a.role)+'</span></td>' +
+      '<td style="text-align:right;color:var(--red);font-weight:600">'+a.xp_this_week+'</td>' +
+      '<td style="text-align:right">'+a.xp_total+'</td>' +
+      '<td style="text-align:right">'+(a.submitted_this_week?'<span class="badge badge-green">✓</span>':'<span class="badge badge-gray">—</span>')+'</td>' +
+      '<td style="text-align:right">'+(active?'<span class="badge badge-green">Ενεργος</span>':'<span class="badge badge-red">Ανενεργος</span>')+'</td>' +
+      '<td style="text-align:right"><button class="btn btn-sm btn-ghost" data-deactivate="'+a.id+'" data-active="'+active+'">'+(active?'Απενεργοποιηση':'Ενεργοποιηση')+'</button></td></tr>';
+  }).join('');
+  return '<div><div class="page-head"><h1 class="page-title">Διαχειριση Agents</h1></div>' +
+    '<div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">' +
+    statCard('Agents',st.total_agents||0,'','') + statCard('Υπεβαλαν',st.submitted_this_week||0,'','') +
+    statCard('Επαφες',st.total_contacts||0,'','') + statCard('Ακινητα',st.total_properties||0,'','') + '</div>' +
+    '<div class="card" style="margin-bottom:20px"><div class="sec-title" style="margin-bottom:14px">Νεος Agent</div><form id="agentf">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">' +
+    '<div><div class="form-label">Ονοματεπωνυμο</div><input class="inp" name="full_name" placeholder="Γιωργος Παπαδοπουλος" required></div>' +
+    '<div><div class="form-label">Email</div><input class="inp" type="email" name="email" required></div>' +
+    '<div><div class="form-label">Κωδικος</div><input class="inp" type="password" name="password" required></div>' +
+    '<div><div class="form-label">Ρολος</div><select class="inp" name="role"><option value="agent">Agent</option><option value="ceo">CEO</option></select></div>' +
+    '</div><button type="submit" class="btn btn-red btn-sm">Δημιουργια</button></form></div>' +
+    '<div class="card" style="padding:0;overflow:hidden"><table class="tbl">' +
+    '<thead><tr><th>Ονομα</th><th>Email</th><th>Ρολος</th><th style="text-align:right">XP Εβδ.</th><th style="text-align:right">Συνολο XP</th><th style="text-align:right">Υπεβαλε</th><th style="text-align:right">Κατασταση</th><th style="text-align:right">Ενεργεια</th></tr></thead>' +
+    '<tbody>'+(rows||'<tr><td colspan="8" class="empty">Κανενα δεδομενο</td></tr>')+'</tbody></table></div></div>';
 }
 
 const METRIC_KEYS=['cold_calls','social_media_leads','mail_leads','portal_leads','referrals','followup_calls','first_meetings','second_meetings','meetings_with_seller','meetings_with_buyer','meetings_with_tenant','exclusive_listings','simple_listings','sale_contracts','purchase_contracts','rental_contracts','photo_shoots','open_houses','matterport_scans','floor_plans','new_partners','referrals_given','trainings_attended','team_meetings','conferences'];
 
 function bind() {
-  document.getElementById('lf')?.addEventListener('submit', async e=>{
+  const lf=document.getElementById('lf');
+  if(lf){lf.addEventListener('submit',async function(e){
     e.preventDefault();
-    const email = document.getElementById('le').value;
-    const password = document.getElementById('lp').value;
-    S.loading=true; S.error=null; render();
-    try {
-      const d=await req('POST','/auth/login',{email, password});
-      S.user=d.user; await nav('dashboard');
-    } catch(err) { S.error=err.message; S.loading=false; render(); }
+    const email=document.getElementById('le').value;
+    const password=document.getElementById('lp').value;
+    S.loading=true;S.error=null;render();
+    try{const d=await api('POST','/auth/login',{email,password});S.user=d.user;await nav('dashboard');}
+    catch(err){S.error=err.message;S.loading=false;render();}
+  });}
+  document.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click',function(e){e.preventDefault();nav(el.dataset.nav);});
   });
-  document.querySelectorAll('[data-nav]').forEach(el=>el.addEventListener('click',()=>nav(el.dataset.nav)));
-  document.getElementById('logoutBtn')?.addEventListener('click', logout);
-  document.getElementById('wf')?.addEventListener('submit', async e=>{
-    e.preventDefault(); S.loading=true; S.error=null; S.success=false; render();
-    try {
-      const fd=new FormData(e.target), body={};
-      METRIC_KEYS.forEach(k=>body[k]=parseInt(fd.get(k)||0));
+  const logBtn=document.getElementById('logoutBtn');
+  if(logBtn)logBtn.addEventListener('click',logout);
+  const wf=document.getElementById('wf');
+  if(wf){wf.addEventListener('submit',async function(e){
+    e.preventDefault();S.loading=true;S.error=null;S.success=null;render();
+    try{
+      const fd=new FormData(e.target);const body={};
+      METRIC_KEYS.forEach(function(k){body[k]=parseInt(fd.get(k)||'0',10);});
       body.notes=fd.get('notes')||null;
-      const res=await req('POST','/agents/weekly/submit',body);
-      S.success=true; S.lastXP=res.xp_earned; S.loading=false;
-      await loadDash(); render();
-    } catch(err) { S.error=err.message; S.loading=false; render(); }
+      const res=await api('POST','/agents/weekly/submit',body);
+      S.success='Υποβληθηκε! +'+res.xp_earned+' XP';S.loading=false;await nav('weekly');
+    }catch(err){S.error=err.message;S.loading=false;render();}
+  });}
+  document.querySelectorAll('.sprint-form').forEach(function(form){
+    form.addEventListener('submit',async function(e){
+      e.preventDefault();const fd=new FormData(form);
+      const body={session_date:form.dataset.date,session_number:parseInt(form.dataset.num,10),calls_made:parseInt(fd.get('calls_made')||'0',10),leads_generated:parseInt(fd.get('leads_generated')||'0',10),meetings_booked:parseInt(fd.get('meetings_booked')||'0',10)};
+      try{await api('POST','/agents/sprint/log',body);S.success='Sprint session '+body.session_number+' καταχωρηθηκε';await nav('sprint');}
+      catch(err){S.error=err.message;render();}
+    });
   });
+  const gpsf=document.getElementById('gpsf');
+  if(gpsf){gpsf.addEventListener('submit',async function(e){
+    e.preventDefault();const fd=new FormData(gpsf);
+    try{await api('PUT','/agents/gps',{annual_gci:parseInt(fd.get('annual_gci')||'0',10),units_target:parseInt(fd.get('units_target')||'0',10),listings_target:parseInt(fd.get('listings_target')||'0',10),buyers_target:parseInt(fd.get('buyers_target')||'0',10)});
+    S.success='GPS Goals αποθηκευτηκαν';await nav('gps');}catch(err){S.error=err.message;render();}
+  });}
+  const annf=document.getElementById('annf');
+  if(annf){annf.addEventListener('submit',async function(e){
+    e.preventDefault();const fd=new FormData(annf);
+    try{await api('POST','/board/announcements',{title:fd.get('title'),body:fd.get('body')||null,type:fd.get('type')||'other'});
+    annf.reset();S.success='Ανακοινωση δημοσιευτηκε';await nav('board');}catch(err){S.error=err.message;render();}
+  });}
+  document.querySelectorAll('[data-del-ann]').forEach(function(btn){
+    btn.addEventListener('click',async function(){
+      if(!confirm('Διαγραφη;'))return;
+      try{await api('DELETE','/board/announcements/'+btn.dataset.delAnn);await nav('board');}catch(err){S.error=err.message;render();}
+    });
+  });
+  document.querySelectorAll('[data-deactivate]').forEach(function(btn){
+    btn.addEventListener('click',async function(){
+      const active=btn.dataset.active==='true';
+      if(!confirm(active?'Απενεργοποιηση;':'Ενεργοποιηση;'))return;
+      try{await api('PUT','/admin/agents/'+btn.dataset.deactivate,{is_active:!active});await nav('admin');}catch(err){S.error=err.message;render();}
+    });
+  });
+  const agentf=document.getElementById('agentf');
+  if(agentf){agentf.addEventListener('submit',async function(e){
+    e.preventDefault();const fd=new FormData(agentf);
+    try{await api('POST','/admin/agents',{full_name:fd.get('full_name'),email:fd.get('email'),password:fd.get('password'),role:fd.get('role')||'agent'});
+    agentf.reset();S.success='Agent δημιουργηθηκε';await nav('admin');}catch(err){S.error=err.message;render();}
+  });}
 }
 
-(async()=>{ const ok=await checkAuth(); if(ok){await nav('dashboard');}else{render();} })();
+function svg(path){return '<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';}
+function icoHome(){return svg('<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>');}
+function icoClip(){return svg('<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>');}
+function icoBolt(){return svg('<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>');}
+function icoTrophy(){return svg('<path d="M8 21h8m-4-4v4M7 4H4a1 1 0 00-1 1v1a4 4 0 004 4h.5M17 4h3a1 1 0 011 1v1a4 4 0 01-4 4h-.5M7 4h10v6a5 5 0 01-10 0V4z"/>');}
+function icoBell(){return svg('<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>');}
+function icoTarget(){return svg('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>');}
+function icoUsers(){return svg('<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/>');}
+function icoLogout(){return svg('<path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>');}
+
+(async function init(){
+  try{const user=await api('GET','/auth/me');S.user=user;await nav('dashboard');}
+  catch(_){render();}
+})();
 </script>
 </body>
 </html>

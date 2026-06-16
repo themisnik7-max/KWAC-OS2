@@ -46,7 +46,10 @@ async def lifespan(app: FastAPI):
 
     # Seed admin user if not exists
     if config.ADMIN_EMAIL and config.ADMIN_PASSWORD:
-        await _seed_admin()
+        try:
+            await _seed_admin()
+        except Exception as e:
+            logger.warning(f"Could not seed admin (schema may not be applied yet): {e}")
 
     logger.info("KWAC OS ready.")
     yield

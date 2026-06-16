@@ -84,7 +84,7 @@ async def _seed_admin():
 app = FastAPI(
     title="KWAC OS API",
     version="2.0.0",
-    docs_url="/docs" if config.IS_DEV else None,   # disable Swagger in production
+    docs_url="/docs",
     redoc_url=None,
     lifespan=lifespan,
 )
@@ -187,6 +187,13 @@ async def logout(response: Response):
 @app.get("/auth/me")
 async def me(user=Depends(require_role("agent", "ceo", "admin"))):
     return user
+
+
+# ── Root ────────────────────────────────────────────────────────
+
+@app.get("/")
+async def root():
+    return {"service": "KWAC OS API", "version": "2.0.0", "status": "running", "docs": "/docs"}
 
 
 # ── Health check ─────────────────────────────────────────────

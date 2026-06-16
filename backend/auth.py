@@ -1,22 +1,18 @@
 """
 KWAC OS — Authentication & Authorization
-- Passwords hashed with bcrypt
-- JWT stored in httponly cookie (not localStorage — XSS-safe)
+- Passwords hashed with bcrypt (direct, no passlib)
+- JWT stored in httponly cookie (XSS-safe)
 - Every protected route uses Depends(require_role(...))
 """
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from fastapi import Depends, HTTPException, Request, status
-from fastapi.security import HTTPBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 import config
 from database import get_db
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-bearer = HTTPBearer(auto_error=False)
 
 ALGORITHM = "HS256"
 
@@ -24,12 +20,20 @@ ALGORITHM = "HS256"
 # ── Password utilities ──────────────────────────────────────
 
 def hash_password(plain: str) -> str:
-    # bcrypt limit is 72 bytes — truncate to avoid errors
-    return pwd_context.hash(plain.encode("utf-8")[:72].decode("utf-8", errors="ignore"))
+    """Hash password with bcrypt, truncating to 72 bytes to avoid bcrypt limit."""
+    truncated = plain.encode("utf-8")[:72]
+    return _bcrypt.hashpw(truncated, _bcrypt.gensalt(12)).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain.encode("utf-8")[:72].decode("utf-8", errors="ignore"), hashed)
+    """Verify password against stored hash. Handles $2a$ (pgcrypto) and $2b$ hashes."""
+    try:
+        truncated = plain.encode("utf-8")[:72]
+        hashed_bytes = hashed.encode("utf-8") if isinstance(hashed, str) else hashed
+        # Handle pgcrypto $2a$ prefix — bcrypt library accepts it
+        return _bcrypt.checkpw(truncated, hashed_bytes)
+    except Exception:
+        return False
 
 
 # ── Token utilities ─────────────────────────────────────────
@@ -60,7 +64,6 @@ def decode_token(token: str) -> dict:
 # ── Request extraction ──────────────────────────────────────
 
 def _get_token_from_request(request: Request) -> Optional[str]:
-    """Try cookie first, then Authorization header."""
     token = request.cookies.get("kwac_token")
     if token:
         return token
@@ -76,7 +79,6 @@ async def get_current_user(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """Returns the current user dict. Raises 401 if not authenticated."""
     token = _get_token_from_request(request)
     if not token:
         raise HTTPException(
@@ -100,12 +102,6 @@ async def get_current_user(
 
 
 def require_role(*roles: str):
-    """
-    Usage:
-        @router.get("/ceo-only")
-        async def ceo_view(user = Depends(require_role("ceo", "admin"))):
-            ...
-    """
     async def dependency(
         request: Request,
         db: AsyncSession = Depends(get_db),
@@ -128,11 +124,8 @@ async def authenticate_user(email: str, password: str, db: AsyncSession) -> Opti
         {"email": email.lower().strip()},
     )
     user = result.mappings().first()
-    if not user:
-        return None
-    if not user["is_active"]:
+    if not user or not user["is_active"]:
         return None
     if not verify_password(password, user["password_hash"]):
         return None
     return dict(user)
-

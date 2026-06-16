@@ -27,7 +27,11 @@ let S = { user:null, page:'login', loading:false, weeklyData:null, goals:[], lea
 
 async function req(method, path, body) {
   const r = await fetch(API+path, { method, credentials:'include', headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined });
-  if (!r.ok) { const e = await r.json().catch(()=>({detail:r.statusText})); throw new Error(e.detail||'Error'); }
+  if (!r.ok) {
+    const e = await r.json().catch(()=>({detail:r.statusText}));
+    const msg = typeof e.detail === 'string' ? e.detail : (Array.isArray(e.detail) ? e.detail.map(x=>x.msg||x).join(', ') : r.statusText);
+    throw new Error(msg||'Σφάλμα σύνδεσης');
+  }
   return r.status===204 ? null : r.json();
 }
 

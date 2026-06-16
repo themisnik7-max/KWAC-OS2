@@ -116,14 +116,11 @@ async def _seed_admin():
         return
     async with AsyncSessionLocal() as db:
         hashed = hash_password(config.ADMIN_PASSWORD)
-        result = await db.execute(text("""
+        await db.execute(text("""
             INSERT INTO users (email, password_hash, full_name, role)
             VALUES (:e, :h, 'Administrator', 'admin')
             ON CONFLICT (email) DO UPDATE SET password_hash = :h
-            RETURNING id
         """), {"e": config.ADMIN_EMAIL, "h": hashed})
-        uid = result.scalar()
-        await db.execute(text("INSERT INTO agents (id) VALUES (:id) ON CONFLICT DO NOTHING"), {"id": uid})
         await db.commit()
         logger.info(f"Admin seeded/updated: {config.ADMIN_EMAIL}")
 

@@ -1,76 +1,84 @@
 """
-KWAC OS v2 — FastAPI Entry Point
-Run locally:  uvicorn main:app --reload --port 8000
-Production:   uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2
+KWAC OS v2 -- FastAPI Entry Point
 """
 import logging
 import os
+from collections import defaultdict
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Response, Depends, HTTPException
+from time import time
+
+from fastapi import FastAPI, HTTPException, Request, Response, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, EmailStr
 from sqlalchemy import text
+
 import config
-from database import get_db, run_schema
+from database import get_db
 from auth import authenticate_user, create_access_token, hash_password, require_role
+from routers import agents, board, admin
 
-# Routers
-from routers import agents, properties, ceo, board, people, admin
-
-# ── Logging ─────────────────────────────────────────────────
 logging.basicConfig(
-    level=logging.INFO if not config.IS_DEV else logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("kwac.log"),
-    ]
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("kwac.main")
 
 
-# ── Startup / Shutdown ───────────────────────────────────────
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("KWAC OS starting up...")
-    if config.IS_DEV:
-        await run_schema()
-    from services.scheduler import start_scheduler
-    start_scheduler()
-    logger.info("Scheduler started.")
+    await _migrate()
     if config.ADMIN_EMAIL and config.ADMIN_PASSWORD:
         try:
             await _seed_admin()
         except Exception as e:
-            logger.warning(f"Could not seed admin: {e}")
+            logger.warning(f"Seed admin skipped: {e}")
     logger.info("KWAC OS ready.")
     yield
     logger.info("KWAC OS shutting down.")
 
 
+async def _migrate():
+    from database import AsyncSessionLocal
+    async with AsyncSessionLocal() as db:
+        try:
+            await db.execute(text("""
+                CREATE TABLE IF NOT EXISTS gps_goals (
+                    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    agent_id        UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    year            INTEGER DEFAULT EXTRACT(YEAR FROM NOW())::INTEGER,
+                    annual_gci      INTEGER DEFAULT 0,
+                    units_target    INTEGER DEFAULT 0,
+                    listings_target INTEGER DEFAULT 0,
+                    buyers_target   INTEGER DEFAULT 0,
+                    updated_at      TIMESTAMPTZ DEFAULT NOW()
+                )
+            """))
+            await db.commit()
+            logger.info("Migrations OK.")
+        except Exception as e:
+            logger.warning(f"Migration warning (non-fatal): {e}")
+            await db.rollback()
+
+
 async def _seed_admin():
     from database import AsyncSessionLocal
     async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            text("SELECT id FROM users WHERE email = :email"),
-            {"email": config.ADMIN_EMAIL},
-        )
-        if result.first():
+        r = await db.execute(text("SELECT id FROM users WHERE email = :email"), {"email": config.ADMIN_EMAIL})
+        if r.first():
             return
-        await db.execute(
-            text("""
-                INSERT INTO users (email, password_hash, full_name, role)
-                VALUES (:email, :hash, 'Administrator', 'admin')
-            """),
-            {"email": config.ADMIN_EMAIL, "hash": hash_password(config.ADMIN_PASSWORD)},
-        )
+        uid = await db.execute(text("""
+            INSERT INTO users (email, password_hash, full_name, role)
+            VALUES (:email, :hash, 'Administrator', 'admin')
+            RETURNING id
+        """), {"email": config.ADMIN_EMAIL, "hash": hash_password(config.ADMIN_PASSWORD)})
+        await db.execute(text("INSERT INTO agents (id) VALUES (:id)"), {"id": uid.scalar()})
         await db.commit()
-        logger.info(f"Admin user created: {config.ADMIN_EMAIL}")
+        logger.info(f"Admin seeded: {config.ADMIN_EMAIL}")
 
-
-# ── App ──────────────────────────────────────────────────────
 
 app = FastAPI(
     title="KWAC OS API",
@@ -82,7 +90,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[config.FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=[config.FRONTEND_URL, "http://localhost:3000", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["Content-Type", "Authorization"],
@@ -94,35 +102,24 @@ async def security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    if not config.IS_DEV:
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 
-from collections import defaultdict
-from time import time
-
 _rate_store: dict = defaultdict(list)
-RATE_LIMIT = 60
+RATE_LIMIT = 120
 RATE_WINDOW = 60
+
 
 @app.middleware("http")
 async def rate_limit(request: Request, call_next):
     ip = request.client.host
     now = time()
-    window_start = now - RATE_WINDOW
-    _rate_store[ip] = [t for t in _rate_store[ip] if t > window_start]
+    _rate_store[ip] = [t for t in _rate_store[ip] if t > now - RATE_WINDOW]
     if len(_rate_store[ip]) >= RATE_LIMIT:
         return JSONResponse(status_code=429, content={"detail": "Too many requests."})
     _rate_store[ip].append(now)
     return await call_next(request)
 
-
-# ── Auth routes ──────────────────────────────────────────────
-
-from pydantic import BaseModel, EmailStr
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -133,28 +130,14 @@ class LoginRequest(BaseModel):
 async def login(body: LoginRequest, response: Response, db=Depends(get_db)):
     user = await authenticate_user(body.email, body.password, db)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password.")
-    token = create_access_token(
-        user_id=str(user["id"]),
-        role=user["role"],
-        email=user["email"],
-    )
+        raise HTTPException(status_code=401, detail="Λαθος email η κωδικος.")
+    token = create_access_token(str(user["id"]), user["role"], user["email"])
     response.set_cookie(
-        key="kwac_token",
-        value=token,
-        httponly=True,
-        secure=not config.IS_DEV,
-        samesite="lax",
+        key="kwac_token", value=token, httponly=True,
+        secure=not config.IS_DEV, samesite="lax",
         max_age=config.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
-    return {
-        "user": {
-            "id": str(user["id"]),
-            "email": user["email"],
-            "full_name": user["full_name"],
-            "role": user["role"],
-        }
-    }
+    return {"user": {"id": str(user["id"]), "email": user["email"], "full_name": user["full_name"], "role": user["role"]}}
 
 
 @app.post("/auth/logout")
@@ -165,26 +148,19 @@ async def logout(response: Response):
 
 @app.get("/auth/me")
 async def me(user=Depends(require_role("agent", "ceo", "admin"))):
-    return user
+    return {"id": str(user["id"]), "email": user["email"], "full_name": user["full_name"], "role": user["role"]}
 
 
 @app.get("/health")
 async def health(db=Depends(get_db)):
     await db.execute(text("SELECT 1"))
-    return {"status": "ok", "env": config.APP_ENV}
+    return {"status": "ok"}
 
 
-# ── Register routers ─────────────────────────────────────────
+app.include_router(agents.router, prefix="/agents", tags=["agents"])
+app.include_router(board.router,  prefix="/board",  tags=["board"])
+app.include_router(admin.router,  prefix="/admin",  tags=["admin"])
 
-app.include_router(agents.router,     prefix="/agents",     tags=["agents"])
-app.include_router(properties.router, prefix="/properties", tags=["properties"])
-app.include_router(people.router,     prefix="/people",     tags=["people"])
-app.include_router(ceo.router,        prefix="/ceo",        tags=["ceo"])
-app.include_router(board.router,      prefix="/board",      tags=["board"])
-app.include_router(admin.router,      prefix="/admin",      tags=["admin"])
-
-
-# ── Static frontend ──────────────────────────────────────────
 
 _static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.isdir(_static_dir):
@@ -192,13 +168,16 @@ if os.path.isdir(_static_dir):
 
 
 @app.get("/", include_in_schema=False)
-async def serve_spa():
-    return FileResponse(os.path.join(_static_dir, "index.html"))
+async def serve_root():
+    idx = os.path.join(_static_dir, "index.html")
+    if os.path.exists(idx):
+        return FileResponse(idx)
+    return JSONResponse({"detail": "Frontend not found"}, status_code=404)
 
 
 @app.get("/{full_path:path}", include_in_schema=False)
 async def spa_fallback(full_path: str):
-    api_prefixes = ("auth/", "agents/", "properties/", "people/", "ceo/", "board/", "admin/", "health", "docs", "static/", "openapi")
+    api_prefixes = ("auth/", "agents/", "board/", "admin/", "properties/", "people/", "ceo/", "health", "docs", "static/", "openapi")
     if any(full_path.startswith(p) for p in api_prefixes):
         raise HTTPException(status_code=404)
     idx = os.path.join(_static_dir, "index.html")
@@ -207,12 +186,7 @@ async def spa_fallback(full_path: str):
     raise HTTPException(status_code=404)
 
 
-# ── Global error handler ─────────────────────────────────────
-
 @app.exception_handler(Exception)
 async def global_error_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled error on {request.url}: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error."},
-    )
+    return JSONResponse(status_code=500, content={"detail": "Internal server error."})

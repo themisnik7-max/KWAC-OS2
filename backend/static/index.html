@@ -727,7 +727,7 @@ function loadBoard() {
       return '<div class="ann">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
         '<div class="ann-title">' + (a.title || '') + '</div>' +
-        (canDel ? '<button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px" onclick="delAnn('' + a.id + '')">X</button>' : '') +
+        (canDel ? `<button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px" onclick="delAnn('${a.id}')">X</button>` : '') +
         '</div>' +
         '<div class="ann-meta">' + (a.author_name || '') + ' · ' + fmtDate(a.created_at) + '</div>' +
         '<div class="ann-body">' + (a.body || '') + '</div></div>';
@@ -757,7 +757,7 @@ function loadInbox() {
     var list = document.getElementById('inbox-list');
     if (!msgs.length) { list.innerHTML = '<div style="color:#555;font-size:13px;padding:20px 0">Den yparchouyn minimata</div>'; return; }
     list.innerHTML = msgs.map(function(m){
-      return '<div class="msg-item' + (m.is_read ? '' : ' unread') + '" onclick="readMsg('' + m.id + '',this)">' +
+      return `<div class="msg-item${m.is_read ? '' : ' unread'}" onclick="readMsg('${m.id}',this)">` +
         '<div style="display:flex;justify-content:space-between">' +
         '<div class="msg-from">' + (m.from_name || m.from_email || '-') + '</div>' +
         '<div class="msg-time">' + fmtDate(m.created_at) + '</div></div>' +
@@ -908,7 +908,7 @@ function loadAdmin() {
         '<td style="color:#666">' + u.email + '</td>' +
         '<td><span class="badge ' + rc + '">' + u.role + '</span></td>' +
         '<td>' + (u.is_active ? '<span class="badge badge-green">Energos</span>' : '<span class="badge badge-gray">Anenergs</span>') + '</td>' +
-        '<td><button class="btn btn-ghost btn-sm" onclick="toggleUser('' + u.id + '',' + !u.is_active + ')">' + (u.is_active?'Apenergopoiisi':'Energopoiisi') + '</button></td></tr>';
+        `<td><button class="btn btn-ghost btn-sm" onclick="toggleUser('${u.id}',${!u.is_active})">${u.is_active?'Apenergopoiisi':'Energopoiisi'}</button></td></tr>`;
     }).join('');
   }).catch(function(){});
 }

@@ -7,7 +7,9 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+import os
 from sqlalchemy import text
 import config
 from database import get_db, run_schema
@@ -213,6 +215,27 @@ app.include_router(people.router,     prefix="/people",     tags=["people"])
 app.include_router(ceo.router,        prefix="/ceo",        tags=["ceo"])
 app.include_router(board.router,      prefix="/board",      tags=["board"])
 app.include_router(admin.router,      prefix="/admin",      tags=["admin"])
+
+
+# ── Static files & SPA ─────────────────────────────────────────
+
+_static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(_static_dir):
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+@app.get("/", include_in_schema=False)
+async def serve_spa():
+    return FileResponse(os.path.join(_static_dir, "index.html"))
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def spa_fallback(full_path: str):
+    skip = ("auth/","agents/","properties/","people/","ceo/","board/","admin/","health","docs","static/","openapi")
+    if any(full_path.startswith(s) for s in skip):
+        raise HTTPException(status_code=404)
+    index = os.path.join(_static_dir, "index.html")
+    if os.path.exists(index):
+        return FileResponse(index)
+    raise HTTPException(status_code=404)
 
 
 # ── Global error handler ─────────────────────────────────────

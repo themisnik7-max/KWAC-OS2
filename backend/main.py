@@ -30,7 +30,7 @@ async def _migrate():
         # GPS Goals
         await db.execute(text("""
             CREATE TABLE IF NOT EXISTS gps_goals (
-                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 agent_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 year INTEGER DEFAULT EXTRACT(YEAR FROM NOW())::INTEGER,
                 annual_gci INTEGER DEFAULT 0,
@@ -43,7 +43,7 @@ async def _migrate():
         # Sprint Sessions
         await db.execute(text("""
             CREATE TABLE IF NOT EXISTS sprint_sessions (
-                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 agent_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 session_date DATE NOT NULL DEFAULT CURRENT_DATE,
                 calls_made INTEGER DEFAULT 0,
@@ -62,7 +62,7 @@ async def _migrate():
         # Messages
         await db.execute(text("""
             CREATE TABLE IF NOT EXISTS messages (
-                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 from_id UUID NOT NULL REFERENCES users(id),
                 to_id UUID NOT NULL REFERENCES users(id),
                 property_code TEXT,
@@ -74,7 +74,7 @@ async def _migrate():
         # Property valuations (Meeting Akinyton)
         await db.execute(text("""
             CREATE TABLE IF NOT EXISTS property_valuations (
-                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 property_id UUID NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
                 agent_id UUID NOT NULL REFERENCES users(id),
                 estimated_price NUMERIC(12,2),

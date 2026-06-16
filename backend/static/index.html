@@ -7,15 +7,15 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.nav-item { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:8px; color:#bfdbfe; cursor:pointer; transition:background .15s; }
-.nav-item:hover, .nav-item.active { background:#1d4ed8; color:#fff; }
+.nav-item { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:8px; color:rgba(255,255,255,.7); cursor:pointer; transition:background .15s; }
+.nav-item:hover, .nav-item.active { background:rgba(255,255,255,.2); color:#fff; }
 .card { background:#fff; border-radius:12px; border:1px solid #f1f5f9; padding:24px; }
 .stat-card { background:#fff; border-radius:12px; border:1px solid #f1f5f9; padding:20px; }
 .btn { padding:8px 16px; border-radius:8px; font-weight:500; cursor:pointer; border:none; transition:background .15s; }
-.btn-primary { background:#2563eb; color:#fff; }
-.btn-primary:hover { background:#1d4ed8; }
+.btn-primary { background:#CC0000; color:#fff; }
+.btn-primary:hover { background:#AA0000; }
 .inp { width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:14px; outline:none; box-sizing:border-box; }
-.inp:focus { box-shadow:0 0 0 2px #3b82f6; }
+.inp:focus { border-color:#CC0000; box-shadow:0 0 0 3px rgba(204,0,0,.12); }
 .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:500; }
 </style>
 </head>
@@ -61,13 +61,13 @@ function render() {
 }
 
 function login() {
-  return `<div style="min-height:100vh;background:linear-gradient(135deg,#1e3a8a,#1e40af);display:flex;align-items:center;justify-content:center;padding:16px">
+  return `<div style="min-height:100vh;background:#CC0000;display:flex;align-items:center;justify-content:center;padding:16px">
   <div style="background:#fff;border-radius:20px;box-shadow:0 25px 50px rgba(0,0,0,.25);width:100%;max-width:360px;padding:40px">
     <div style="text-align:center;margin-bottom:32px">
-      <div style="font-size:28px;font-weight:900;color:#1e3a8a;letter-spacing:-1px">KWAC OS</div>
+      <div style="font-size:28px;font-weight:900;color:#CC0000;letter-spacing:-1px">KWAC OS</div>
       <div style="font-size:13px;color:#94a3b8;margin-top:4px">Real Estate CRM</div>
     </div>
-    ${S.error?`<div style="background:#fef2f2;color:#dc2626;font-size:13px;border-radius:8px;padding:12px;margin-bottom:16px">${S.error}</div>`:''}
+    ${S.error?`<div style="background:#fef2f2;color:#CC0000;font-size:13px;border-radius:8px;padding:12px;margin-bottom:16px">${S.error}</div>`:''}
     <form id="lf">
       <div style="margin-bottom:16px">
         <label style="display:block;font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px">EMAIL</label>
@@ -87,11 +87,11 @@ function login() {
 
 function shell() {
   return `<div style="display:flex">
-  <aside style="background:#1e3a8a;color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;width:220px;z-index:10">
+  <aside style="background:#CC0000;color:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;width:220px;z-index:10">
     <div style="padding:24px 20px;border-bottom:1px solid rgba(255,255,255,.1)">
       <div style="font-size:20px;font-weight:900;letter-spacing:-0.5px">KWAC OS</div>
-      <div style="font-size:12px;color:#93c5fd;margin-top:4px">${S.user.full_name||S.user.email}</div>
-      <div style="font-size:11px;color:#60a5fa;margin-top:2px;text-transform:capitalize">${S.user.role}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:4px">${S.user.full_name||S.user.email}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;text-transform:capitalize">${S.user.role}</div>
     </div>
     <nav style="flex:1;padding:12px">
       <div class="nav-item ${S.page==='dashboard'?'active':''}" data-nav="dashboard">
@@ -108,7 +108,7 @@ function shell() {
       </div>
     </nav>
     <div style="padding:12px">
-      <div class="nav-item" id="logoutBtn" style="color:#fca5a5;cursor:pointer">
+      <div class="nav-item" id="logoutBtn" style="color:rgba(255,255,255,.6);cursor:pointer">
         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         Αποσύνδεση
       </div>
@@ -133,7 +133,7 @@ function dash() {
   const weekStr=mon.toLocaleDateString('el-GR',{day:'numeric',month:'long'});
   const gcards=S.goals.slice(0,6).map(g=>{
     const val=w?.[g.metric]||0, pct=Math.min(100,Math.round(val/(g.target||1)*100)), hit=val>=g.target;
-    return `<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><span style="font-size:12px;color:#64748b">${g.label_el||g.metric}</span><span class="badge" style="background:${hit?'#d1fae5':'#f1f5f9'};color:${hit?'#065f46':'#64748b'}">${val}/${g.target}</span></div><div style="margin-top:10px;background:#f1f5f9;border-radius:999px;height:6px"><div style="height:6px;border-radius:999px;width:${pct}%;background:${hit?'#10b981':'#3b82f6'}"></div></div></div>`;
+    return `<div class="stat-card"><div style="display:flex;justify-content:space-between;align-items:start"><span style="font-size:12px;color:#64748b">${g.label_el||g.metric}</span><span class="badge" style="background:${hit?'#d1fae5':'#f1f5f9'};color:${hit?'#065f46':'#64748b'}">${val}/${g.target}</span></div><div style="margin-top:10px;background:#f1f5f9;border-radius:999px;height:6px"><div style="height:6px;border-radius:999px;width:${pct}%;background:${hit?'#10b981':'#CC0000'}"></div></div></div>`;
   }).join('');
   return `<div style="max-width:900px;margin:0 auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
@@ -141,7 +141,7 @@ function dash() {
       ${!submitted?`<button class="btn btn-primary" data-nav="weekly" style="font-size:14px">+ Καταχώρηση</button>`:`<span class="badge" style="background:#d1fae5;color:#065f46;padding:8px 16px;font-size:13px">✓ Υποβλήθηκε</span>`}
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
-      <div class="stat-card"><div style="font-size:12px;color:#64748b">XP Εβδομάδας</div><div style="font-size:28px;font-weight:700;color:#2563eb;margin-top:4px">${xp}</div></div>
+      <div class="stat-card"><div style="font-size:12px;color:#64748b">XP Εβδομάδας</div><div style="font-size:28px;font-weight:700;color:#CC0000;margin-top:4px">${xp}</div></div>
       <div class="stat-card"><div style="font-size:12px;color:#64748b">Σύνολο XP</div><div style="font-size:28px;font-weight:700;color:#0f172a;margin-top:4px">${S.user.xp_total||0}</div></div>
       <div class="stat-card"><div style="font-size:12px;color:#64748b">Level</div><div style="font-size:28px;font-weight:700;color:#f59e0b;margin-top:4px">${S.user.level||1}</div></div>
       <div class="stat-card"><div style="font-size:12px;color:#64748b">Streak</div><div style="font-size:28px;font-weight:700;color:#10b981;margin-top:4px">${S.user.streak_weeks||0} 🔥</div></div>
@@ -169,7 +169,7 @@ function weekly() {
   }).join('');
   return `<div style="max-width:640px;margin:0 auto">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
-      <span style="color:#94a3b8;cursor:pointer;font-size:14px" data-nav="dashboard">← Πίσω</span>
+      <span style="color:#CC0000;cursor:pointer;font-size:14px" data-nav="dashboard">← Πίσω</span>
       <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0">Εβδομαδιαία Καταχώρηση</h1>
     </div>
     ${S.error?`<div style="background:#fef2f2;color:#dc2626;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px">${S.error}</div>`:''}
@@ -186,7 +186,7 @@ function weekly() {
 
 function lb() {
   const medals=['🥇','🥈','🥉'];
-  const rows=S.leaderboard.map((a,i)=>`<tr style="border-bottom:1px solid #f8fafc"><td style="padding:12px 16px;color:#94a3b8;font-size:14px">${medals[i]||(i+1)}</td><td style="padding:12px 0;font-weight:500;color:#0f172a">${a.full_name}</td><td style="padding:12px 16px;text-align:right;color:#2563eb;font-weight:700">${a.xp_this_week||0}</td><td style="padding:12px 16px;text-align:right;color:#64748b">${a.xp_total||0}</td><td style="padding:12px 16px;text-align:right">${a.submitted_at?'<span class="badge" style="background:#d1fae5;color:#065f46">OK</span>':'<span class="badge" style="background:#f1f5f9;color:#94a3b8">-</span>'}</td></tr>`).join('');
+  const rows=S.leaderboard.map((a,i)=>`<tr style="border-bottom:1px solid #f8fafc"><td style="padding:12px 16px;color:#94a3b8;font-size:14px">${medals[i]||(i+1)}</td><td style="padding:12px 0;font-weight:500;color:#0f172a">${a.full_name}</td><td style="padding:12px 16px;text-align:right;color:#CC0000;font-weight:700">${a.xp_this_week||0}</td><td style="padding:12px 16px;text-align:right;color:#64748b">${a.xp_total||0}</td><td style="padding:12px 16px;text-align:right">${a.submitted_at?'<span class="badge" style="background:#d1fae5;color:#065f46">OK</span>':'<span class="badge" style="background:#f1f5f9;color:#94a3b8">-</span>'}</td></tr>`).join('');
   return `<div style="max-width:640px;margin:0 auto">
     <h1 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 24px">Κατάταξη Εβδομάδας</h1>
     <div class="card" style="padding:0;overflow:hidden">
@@ -208,9 +208,12 @@ const METRIC_KEYS=['cold_calls','social_media_leads','mail_leads','portal_leads'
 
 function bind() {
   document.getElementById('lf')?.addEventListener('submit', async e=>{
-    e.preventDefault(); S.loading=true; S.error=null; render();
+    e.preventDefault();
+    const email = document.getElementById('le').value;
+    const password = document.getElementById('lp').value;
+    S.loading=true; S.error=null; render();
     try {
-      const d=await req('POST','/auth/login',{email:document.getElementById('le').value,password:document.getElementById('lp').value});
+      const d=await req('POST','/auth/login',{email, password});
       S.user=d.user; await nav('dashboard');
     } catch(err) { S.error=err.message; S.loading=false; render(); }
   });

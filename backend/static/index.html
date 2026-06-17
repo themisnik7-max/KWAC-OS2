@@ -499,6 +499,7 @@ function startApp() {
     document.getElementById('ann-new-btn').style.display = '';
   }
   document.getElementById('login-page').classList.remove('active');
+  document.getElementById('login-page').style.display = 'none';
   loadDashboard(); show('dashboard'); pollUnread();
 }
 function checkAuth() {
